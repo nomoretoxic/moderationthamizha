@@ -52,7 +52,7 @@ client.on("messageCreate", async (message) => {
             await message.delete();
 
             await message.author.send(
-                `⚠️ **SENDING LINKS IS NOT ALLOWED IN THAMIZHA CLOUD**`
+                `⚠️ **SENDING LINKS IS NOT ALLOWED IN DARK SHADOW MC**`
             );
 
             const logChannel = message.guild.channels.cache.get(LOG_CHANNEL_ID);
