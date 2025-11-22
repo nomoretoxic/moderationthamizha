@@ -1,6 +1,8 @@
-const { Client, GatewayIntentBits, Partials } = require("discord.js");
-const express = require("express");
-require("dotenv").config();
+import { Client, GatewayIntentBits, Partials } from "discord.js";
+import express from "express";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // ==========================
 // 🔧 ENV VARIABLES
@@ -8,14 +10,14 @@ require("dotenv").config();
 const TOKEN = process.env.TOKEN;
 const GUILD_ID = process.env.GUILD_ID;
 const LOG_CHANNEL_ID = process.env.LOG_CHANNEL_ID;
-const PORT = process.env.PORT || 3000; // Web service port
+const PORT = process.env.PORT || 3000;
 // ==========================
 
 // Regex to detect links
 const linkRegex = /(https?:\/\/[^\s]+)/gi;
 
 // ==========================
-// 🌐 WEB SERVER (for hosting)
+// 🌐 Web server (Render requirement)
 // ==========================
 const app = express();
 
@@ -26,8 +28,10 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(`🌐 Web service running on port ${PORT}`);
 });
-// ==========================
 
+// ==========================
+// 🤖 Discord Bot Setup
+// ==========================
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -39,38 +43,32 @@ const client = new Client({
 });
 
 client.on("messageCreate", async (message) => {
-    // Only work inside your server
     if (message.guild?.id !== GUILD_ID) return;
 
-    // Ignore bot messages
     if (message.author.bot) return;
 
-    // Detect links
     if (linkRegex.test(message.content)) {
         try {
-            // Delete the message
             await message.delete();
 
-            // DM warning
             await message.author.send(
                 `⚠️ **SENDING LINKS IS NOT ALLOWED IN THAMIZHA CLOUD**`
             );
 
-            // Log to mod channel
             const logChannel = message.guild.channels.cache.get(LOG_CHANNEL_ID);
             if (logChannel) {
                 await logChannel.send(
                     `🛑 **Link Deleted**\n` +
                     `👤 User: <@${message.author.id}> (${message.author.tag})\n` +
                     `📌 Channel: <#${message.channel.id}>\n` +
-                    `💬 Message Content: \`${message.content}\``
+                    `💬 Message: \`${message.content}\``
                 );
             }
 
-            console.log(`✔ Deleted link + DM sent + logged for ${message.author.tag}`);
+            console.log(`✔ Link deleted + user DM'd + logged.`);
 
-        } catch (err) {
-            console.error("Moderation Error:", err);
+        } catch (error) {
+            console.error("Moderation Error:", error);
         }
     }
 });
